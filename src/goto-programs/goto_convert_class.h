@@ -18,7 +18,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/message/message_stream.h>
 #include <util/namespace.h>
 #include <util/options.h>
-#include <util/symbol_generator.h>
 #include <util/std_code.h>
 
 class goto_convertt : public message_streamt
@@ -34,7 +33,8 @@ public:
       context(_context),
       options(_options),
       ns(_context),
-      tmp_symbol("goto_convertt::")
+      temporary_counter(0),
+      tmp_symbol_prefix("goto_convertt::")
   {
   }
 
@@ -44,7 +44,8 @@ protected:
   contextt &context;
   optionst &options;
   namespacet ns;
-  symbol_generator tmp_symbol;
+  unsigned temporary_counter;
+  std::string tmp_symbol_prefix;
 
   void goto_convert_rec(const codet &code, goto_programt &dest);
 

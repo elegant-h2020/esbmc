@@ -1948,7 +1948,18 @@ void goto_convertt::generate_conditional_branch(
 
 symbolt &goto_convertt::new_tmp_symbol(const typet &type)
 {
-  return tmp_symbol.new_symbol(context, type, "tmp$");
+  symbolt new_symbol;
+  symbolt *symbol_ptr;
+
+  do
+  {
+    new_symbol.name = "tmp$" + i2string(++temporary_counter);
+    new_symbol.id = tmp_symbol_prefix + id2string(new_symbol.name);
+    new_symbol.lvalue = true;
+    new_symbol.type = type;
+  } while(context.move(new_symbol, symbol_ptr));
+
+  return *symbol_ptr;
 }
 
 void goto_convertt::unwind_destructor_stack(

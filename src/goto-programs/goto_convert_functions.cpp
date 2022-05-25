@@ -100,7 +100,8 @@ void goto_convert_functionst::convert_function(symbolt &symbol)
     return;
 
   // make tmp variables local to function
-  tmp_symbol = symbol_generator(id2string(symbol.id) + "::$tmp::");
+  tmp_symbol_prefix = id2string(symbol.id) + "::$tmp::";
+  temporary_counter = 0;
 
   auto it = functions.function_map.find(identifier);
   if(it == functions.function_map.end())

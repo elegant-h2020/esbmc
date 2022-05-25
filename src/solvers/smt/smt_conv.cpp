@@ -2283,19 +2283,9 @@ expr2tc smt_convt::get_by_ast(const type2tc &type, smt_astt a)
   }
 
   default:
-    if(!options.get_bool_option("non-supported-models-as-zero"))
-    {
-      msg.error(fmt::format(
-        "Unimplemented type'd expression ({}) in smt get", type->type_id));
-      abort();
-    }
-    else
-    {
-      msg.warning(fmt::format(
-        "Unimplemented type'd expression ({}) in smt get. Returning zero!",
-        type->type_id));
-      return gen_zero(type);
-    }
+    msg.error(fmt::format(
+      "Unimplemented type'd expression ({}) in smt get", type->type_id));
+    abort();
   }
 }
 
@@ -2319,20 +2309,9 @@ expr2tc smt_convt::get_by_type(const expr2tc &expr)
     return tuple_api->tuple_get(expr);
 
   default:
-    if(!options.get_bool_option("non-supported-models-as-zero"))
-    {
-      msg.error(fmt::format(
-        "Unimplemented type'd expression ({}) in smt get",
-        expr->type->type_id));
-      abort();
-    }
-    else
-    {
-      msg.warning(fmt::format(
-        "Unimplemented type'd expression ({}) in smt get. Returning zero!",
-        expr->type->type_id));
-      return gen_zero(expr->type);
-    }
+    msg.error(fmt::format(
+      "Unimplemented type'd expression ({}) in smt get", expr->type->type_id));
+    abort();
   }
 }
 
@@ -2722,13 +2701,6 @@ expr2tc smt_convt::get_by_value(const type2tc &type, BigInt value)
   }
 
   default:;
-  }
-
-  if(options.get_bool_option("non-supported-models-as-zero"))
-  {
-    msg.warning(fmt::format(
-      "Can't generate one for type {}. Returning zero", get_type_id(type)));
-    return gen_zero(type);
   }
 
   msg.error(fmt::format("Can't generate one for type {}", get_type_id(type)));
