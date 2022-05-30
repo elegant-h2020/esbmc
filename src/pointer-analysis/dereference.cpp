@@ -701,7 +701,7 @@ expr2tc dereferencet::build_reference_to(
 
   value = object;
 
-  // Produce a guard that the dererferenced pointer points at this object.
+  // Produce a guard that the dereferenced pointer points at this object.
   type2tc ptr_type = type2tc(new pointer_type2t(object->type));
   address_of2tc obj_ptr(ptr_type, object);
   pointer_guard = same_object2tc(deref_expr, obj_ptr);
@@ -1335,7 +1335,7 @@ void dereferencet::construct_from_dyn_struct_offset(
   // if we are accessing the struct using a byte, we can ignore alignment
   // rules, so convert the struct to bv and dispatch it to
   // construct_from_dyn_offset
-  if(type->get_width() == 8)
+  if(type->get_width() == config.ansi_c.char_width)
   {
     value = bitcast2tc(get_uint_type(value->type->get_width()), value);
     return construct_from_dyn_offset(value, offset, type);
@@ -1418,7 +1418,15 @@ void dereferencet::construct_from_dyn_struct_offset(
       construct_from_array(field, new_offset, type, guard, mode, alignment);
       extract_list.emplace_back(field_guard, field);
     }
-    else if((access_sz > it->get_width()) && (type->get_width() != 8))
+    else if(is_union_type(it))
+    {
+      // Try to resolve this recursively
+      build_reference_rec(field, new_offset, type, guard, mode, alignment);
+      extract_list.emplace_back(field_guard, field);
+    }
+    else if(
+      access_sz > it->get_width() &&
+      type->get_width() != config.ansi_c.char_width)
     {
       guardt newguard(guard);
       newguard.add(field_guard);
@@ -1449,13 +1457,8 @@ void dereferencet::construct_from_dyn_struct_offset(
   // Build up the new value, switching on the field guard, with the failed
   // symbol at the base.
   expr2tc new_value = failed_container;
-  for(std::list<std::pair<expr2tc, expr2tc>>::const_iterator it =
-        extract_list.begin();
-      it != extract_list.end();
-      it++)
-  {
-    new_value = if2tc(type, it->first, it->second, new_value);
-  }
+  for(const auto &it : extract_list)
+    new_value = if2tc(type, it.first, it.second, new_value);
 
   value = new_value;
 }
